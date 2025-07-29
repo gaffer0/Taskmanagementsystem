@@ -1,0 +1,24 @@
+### Create a new project
+POST https://localhost:7001/api/Project
+Content-Type: application/json
+
+{
+  "name": "My New Project"
+}
+
+### Get all projects
+GET https://localhost:7001/api/Project
+
+### Get a specific project (replace {id} with actual project ID)
+GET https://localhost:7001/api/Project/{id}
+
+### Update a project (replace {id} with actual project ID)
+PUT https://localhost:7001/api/Project/{id}
+Content-Type: application/json
+
+{
+  "name": "Updated Project Name"
+}
+
+### Delete a project (replace {id} with actual project ID)
+DELETE https://localhost:7001/api/Project/{id} 
