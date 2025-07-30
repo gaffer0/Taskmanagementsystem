@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using Application_.DTOs;
 using Domain.Entities;
+using Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -28,11 +29,16 @@ namespace Taskmanagementsystem.Controllers
                 var user = new ApplicationUser
                 {
                     UserName = RUser.UserName,
-                    Email = RUser.Email
+                    Email = RUser.Email,
+                    Role = UserRole.Member, // Default role for new users
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
                 };
                 var result = await _userManager.CreateAsync(user, RUser.Password);
                 if (result.Succeeded)
                 {
+                    // Add user to role
+                    await _userManager.AddToRoleAsync(user, user.Role.ToString());
                     return Ok("User registered successfully");
                 }
                 foreach (var error in result.Errors)
@@ -49,11 +55,21 @@ namespace Taskmanagementsystem.Controllers
             if (ModelState.IsValid)
             {
                 //check
-                ApplicationUser UserFromDB = await _userManager.FindByNameAsync(UserFromRequest.userName);
+                ApplicationUser? UserFromDB = await _userManager.FindByNameAsync(UserFromRequest.userName);
+                if (UserFromDB == null)
+                {
+                    ModelState.AddModelError("UserName", "User name or password is invalid");
+                    return BadRequest(ModelState);
+                }
+
                 bool found = await _userManager.CheckPasswordAsync(UserFromDB, UserFromRequest.password);
 
-                if (found)
+                if (found && UserFromDB.IsActive)
                 {
+                    // Update last login
+                    UserFromDB.LastLoginAt = DateTime.UtcNow;
+                    await _userManager.UpdateAsync(UserFromDB);
+
                     // Token Genrated id change (JWT predefind Claims JIT)
                     //Generate Token
 
@@ -61,7 +77,11 @@ namespace Taskmanagementsystem.Controllers
                     UserClaim
                         .Add(new Claim(ClaimTypes.NameIdentifier, UserFromDB.Id.ToString()));
                     UserClaim
-                        .Add(new Claim(ClaimTypes.Name, UserFromDB.UserName));
+                        .Add(new Claim(ClaimTypes.Name, UserFromDB.UserName ?? ""));
+                    UserClaim
+                        .Add(new Claim(ClaimTypes.Email, UserFromDB.Email ?? ""));
+                    UserClaim
+                        .Add(new Claim("Role", UserFromDB.Role.ToString()));
 
                     UserClaim
                         .Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
@@ -90,7 +110,15 @@ namespace Taskmanagementsystem.Controllers
                     return Ok(new
                     {
                         token = new JwtSecurityTokenHandler().WriteToken(MyToken),
-                        expiration = DateTime.Now.AddHours(1)
+                        expiration = DateTime.Now.AddHours(1),
+                        user = new
+                        {
+                            id = UserFromDB.Id,
+                            userName = UserFromDB.UserName,
+                            email = UserFromDB.Email,
+                            fullName = UserFromDB.FullName,
+                            role = UserFromDB.Role.ToString()
+                        }
                     });
 
 

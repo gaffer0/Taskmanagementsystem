@@ -38,6 +38,19 @@ namespace Infrastructure.Data
                 .HasOne(pm => pm.Project)
                 .WithMany(p => p.Members)
                 .HasForeignKey(pm => pm.ProjectId);
+
+            // Configure TaskItem relationships
+            modelBuilder.Entity<TaskItem>()
+                .HasOne(t => t.AssignedUser)
+                .WithMany(u => u.AssignedTasks)
+                .HasForeignKey(t => t.AssignedUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TaskItem>()
+                .HasOne(t => t.Project)
+                .WithMany(p => p.Tasks)
+                .HasForeignKey(t => t.ProjectId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
