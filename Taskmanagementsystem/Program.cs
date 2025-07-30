@@ -1,6 +1,10 @@
 using System.Text;
+using Application_.Interfaces;
+using Application_.Services;
 using Domain.Entities;
+using Domain.Enums;
 using Infrastructure.Data;
+using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +15,7 @@ namespace Taskmanagementsystem
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -21,38 +25,61 @@ namespace Taskmanagementsystem
 
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>().AddEntityFrameworkStores<AppDbContext>();
+            
+            // Configure Authentication
             builder.Services.AddAuthentication(options =>
             {
-                //check JWT token header
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;//unauthorized
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(options =>
             {
-
                 options.SaveToken = true;
-                options.RequireHttpsMetadata = true;
-                options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                options.RequireHttpsMetadata = false; // Set to false for development
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-
                     ValidIssuer = builder.Configuration["Jwt:Issuer"],
                     ValidAudience = builder.Configuration["Jwt:Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("ThisIsAReallyStrongSecretKey1234567890!"))
                 };
-
-
             });
 
+            // Configure Authorization
+            builder.Services.AddAuthorization(options =>
+            {
+                // Add policy for SuperAdmin
+                options.AddPolicy("SuperAdmin", policy =>
+                    policy.RequireRole("SuperAdmin"));
+
+                // Add policy for ProjectManager and above
+                options.AddPolicy("ProjectManager", policy =>
+                    policy.RequireRole("SuperAdmin", "ProjectManager"));
+
+                // Add policy for TeamLead and above
+                options.AddPolicy("TeamLead", policy =>
+                    policy.RequireRole("SuperAdmin", "ProjectManager", "TeamLead"));
+
+                // Add policy for all authenticated users
+                options.AddPolicy("Authenticated", policy =>
+                    policy.RequireAuthenticatedUser());
+            });
+
+            // Register Repositories
+            builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+            builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+
+            // Register Application Services
+            builder.Services.AddScoped<IUserManagementService, UserManagementService>();
+            builder.Services.AddScoped<ITaskService, TaskService>();
+            builder.Services.AddScoped<IProjectService, ProjectService>();
+
             // Add services to the container.
-
-
-
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -67,14 +94,23 @@ namespace Taskmanagementsystem
 
             app.UseHttpsRedirection();
 
-            //app.UseAuthenticatian(); by default "Cookie"
-
+            // Add Authentication and Authorization middleware
+            app.UseAuthentication();
             app.UseAuthorization();
 
+            // Seed database
+            using (var scope = app.Services.CreateScope())
+            {
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                
+                await DbSeeder.SeedRolesAsync(roleManager);
+                await DbSeeder.SeedSuperAdminAsync(userManager);
+            }
 
             app.MapControllers();
 
-            app.Run();
+            await app.RunAsync();
         }
     }
 }

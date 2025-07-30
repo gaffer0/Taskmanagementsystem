@@ -1,0 +1,69 @@
+@Taskmanagementsystem_HostAddress = http://localhost:5210
+
+### Login to get token
+# @name login
+POST {{Taskmanagementsystem_HostAddress}}/api/account/login
+Content-Type: application/json
+
+{
+  "userName": "admin",
+  "password": "Admin123!"
+}
+
+### Extract token from login response
+@auth_token = {{login.response.body.token}}
+
+### Create a new task
+POST {{Taskmanagementsystem_HostAddress}}/api/task
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "title": "Implement User Authentication",
+  "description": "Create login and registration functionality",
+  "projectId": "{{projectId}}",
+  "assignedUserId": "{{userId}}",
+  "dueDate": "2024-12-31T23:59:59",
+  "priority": "High"
+}
+
+### Get all tasks
+GET {{Taskmanagementsystem_HostAddress}}/api/task
+Authorization: Bearer {{auth_token}}
+
+### Get a specific task (replace {id} with actual task ID)
+GET {{Taskmanagementsystem_HostAddress}}/api/task/{id}
+Authorization: Bearer {{auth_token}}
+
+### Get tasks by project (replace {projectId} with actual project ID)
+GET {{Taskmanagementsystem_HostAddress}}/api/task/project/{projectId}
+Authorization: Bearer {{auth_token}}
+
+### Get tasks by user (replace {userId} with actual user ID)
+GET {{Taskmanagementsystem_HostAddress}}/api/task/user/{userId}
+Authorization: Bearer {{auth_token}}
+
+### Update a task (replace {id} with actual task ID)
+PUT {{Taskmanagementsystem_HostAddress}}/api/task/{id}
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "title": "Updated Task Title",
+  "description": "Updated task description",
+  "status": "InProgress",
+  "assignedUserId": "{{userId}}",
+  "dueDate": "2024-12-31T23:59:59",
+  "priority": "Medium"
+}
+
+### Change task status (replace {id} with actual task ID)
+PUT {{Taskmanagementsystem_HostAddress}}/api/task/{id}/status
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+"Done"
+
+### Delete a task (replace {id} with actual task ID)
+DELETE {{Taskmanagementsystem_HostAddress}}/api/task/{id}
+Authorization: Bearer {{auth_token}} 
