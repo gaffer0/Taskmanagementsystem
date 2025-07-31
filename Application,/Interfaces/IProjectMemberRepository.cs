@@ -1,13 +1,6 @@
 ﻿using Application_.DTOs;
 using Application_.Interfaces;
 using Domain.Entities;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Query;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Interfaces
 {
@@ -16,10 +9,11 @@ namespace Infrastructure.Interfaces
         Task<bool> DeleteMemberAsync(DeleteProjectMemberDTO projectMemberDTO);
         Task<List<ProjectMemberResponseDTO>> ListProjectMembersAsync(ListProjectMembersDTO listDTO);
         Task<SearchProjectMembersResponseDTO> SearchProjectMembersAsync(SearchProjectMembersRequestDTO searchRequest);
-        
+
         // Additional methods for composite key operations
         Task<ProjectMember?> GetProjectMemberAsync(Guid userId, Guid projectId);
         Task<List<ProjectMember>> GetProjectMembersByProjectAsync(Guid projectId);
         Task<List<ProjectMember>> GetProjectMembersByUserAsync(Guid userId);
+        Task<(bool Success, string Message)> AssignMemberToProjectAsync(ProjectMember newMember);
     }
 }

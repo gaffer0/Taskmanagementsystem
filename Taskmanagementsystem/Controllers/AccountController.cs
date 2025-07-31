@@ -1,4 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 using Application_.DTOs;
@@ -194,7 +195,10 @@ namespace Taskmanagementsystem.Controllers
                 return BadRequest("Invalid request");
             }
 
-            var result = await _userManager.ResetPasswordAsync(user, resetDto.Token, resetDto.NewPassword);
+            // Decode the token if it is URL-encoded
+            var decodedToken = WebUtility.UrlDecode(resetDto.Token);
+
+            var result = await _userManager.ResetPasswordAsync(user, decodedToken, resetDto.NewPassword);
             if (result.Succeeded)
             {
                 return Ok("Password has been reset successfully");

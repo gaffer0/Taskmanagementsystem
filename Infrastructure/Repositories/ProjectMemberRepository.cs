@@ -1,16 +1,8 @@
 ﻿using Application_.DTOs;
-using Application_.Interfaces;
 using Domain.Entities;
 using Infrastructure.Data;
 using Infrastructure.Interfaces;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories
 {
@@ -63,7 +55,7 @@ namespace Infrastructure.Repositories
 
             if (!string.IsNullOrEmpty(searchRequest.SearchTerm))
             {
-                query = query.Where(pm => 
+                query = query.Where(pm =>
                     pm.User.UserName.Contains(searchRequest.SearchTerm) ||
                     pm.User.Email.Contains(searchRequest.SearchTerm) ||
                     pm.Role.Contains(searchRequest.SearchTerm) ||
@@ -85,7 +77,7 @@ namespace Infrastructure.Repositories
 
             query = searchRequest.SortBy?.ToLower() switch
             {
-                "username" => searchRequest.SortDirection?.ToLower() == "desc" 
+                "username" => searchRequest.SortDirection?.ToLower() == "desc"
                     ? query.OrderByDescending(pm => pm.User.UserName)
                     : query.OrderBy(pm => pm.User.UserName),
                 "email" => searchRequest.SortDirection?.ToLower() == "desc"
@@ -165,6 +157,20 @@ namespace Infrastructure.Repositories
                 .Include(pm => pm.Project)
                 .Where(pm => pm.UserId == userId)
                 .ToListAsync();
+        }
+        public async Task<(bool Success, string Message)> AssignMemberToProjectAsync(ProjectMember newMember)
+        {
+            // Check if the member already exists in the project
+            var existingMember = await _context.ProjectMembers
+                .FirstOrDefaultAsync(pm => pm.UserId == newMember.UserId && pm.ProjectId == newMember.ProjectId);
+            if (existingMember != null)
+            {
+                return (false, "Member is already assigned to this project.");
+            }
+
+            _context.ProjectMembers.Add(newMember);
+            await _context.SaveChangesAsync();
+            return (true, "Member assigned successfully.");
         }
     }
 }

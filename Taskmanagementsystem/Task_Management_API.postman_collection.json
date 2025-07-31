@@ -1,0 +1,843 @@
+{
+	"info": {
+		"_postman_id": "task-management-api-collection",
+		"name": "Task Management System API",
+		"description": "Complete API collection for the Task Management System with JWT authentication and role-based authorization",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userName\": \"admin\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/account/Login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"account",
+								"Login"
+							]
+						},
+						"description": "Authenticate user and receive JWT token"
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userName\": \"newuser\",\n  \"email\": \"newuser@example.com\",\n  \"password\": \"Password123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/account/Register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"account",
+								"Register"
+							]
+						},
+						"description": "Register a new user account"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/account/Logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"account",
+								"Logout"
+							]
+						},
+						"description": "Logout user (client-side token disposal)"
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/account/ForgotPassword",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"account",
+								"ForgotPassword"
+							]
+						},
+						"description": "Request password reset link"
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"token\": \"YOUR_RESET_TOKEN_HERE\",\n  \"newPassword\": \"NewPassword123!\",\n  \"confirmPassword\": \"NewPassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/account/ResetPassword",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"account",
+								"ResetPassword"
+							]
+						},
+						"description": "Reset password using token"
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints for login, register, logout, and password reset"
+		},
+		{
+			"name": "User Management",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/UserManagement",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"UserManagement"
+							]
+						},
+						"description": "Retrieve all users in the system (SuperAdmin, ProjectManager)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/UserManagement/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"UserManagement",
+								"{{userId}}"
+							]
+						},
+						"description": "Retrieve a specific user by ID (SuperAdmin, ProjectManager)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/UserManagement/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"UserManagement",
+								"{{userId}}"
+							]
+						},
+						"description": "Delete a user from the system (SuperAdmin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Activate User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/UserManagement/{{userId}}/activate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"UserManagement",
+								"{{userId}}",
+								"activate"
+							]
+						},
+						"description": "Activate a deactivated user (SuperAdmin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Deactivate User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/UserManagement/{{userId}}/deactivate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"UserManagement",
+								"{{userId}}",
+								"deactivate"
+							]
+						},
+						"description": "Deactivate a user account (SuperAdmin only)"
+					},
+					"response": []
+				}
+			],
+			"description": "User management endpoints for CRUD operations on users"
+		},
+		{
+			"name": "Project Management",
+			"item": [
+				{
+					"name": "Create Project",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"New Project\",\n  \"description\": \"Project description\",\n  \"startDate\": \"2024-01-01T00:00:00Z\",\n  \"endDate\": \"2024-12-31T00:00:00Z\",\n  \"status\": \"Active\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Project",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Project"
+							]
+						},
+						"description": "Create a new project (SuperAdmin, ProjectManager)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Projects",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Project",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Project"
+							]
+						},
+						"description": "Retrieve all projects (SuperAdmin, ProjectManager, TeamLead)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Project by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Project/{{projectId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Project",
+								"{{projectId}}"
+							]
+						},
+						"description": "Retrieve a specific project by ID (SuperAdmin, ProjectManager, TeamLead)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Project",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Project Name\",\n  \"description\": \"Updated project description\",\n  \"startDate\": \"2024-01-01T00:00:00Z\",\n  \"endDate\": \"2024-12-31T00:00:00Z\",\n  \"status\": \"Active\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Project/{{projectId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Project",
+								"{{projectId}}"
+							]
+						},
+						"description": "Update an existing project (SuperAdmin, ProjectManager)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Project",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Project/{{projectId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Project",
+								"{{projectId}}"
+							]
+						},
+						"description": "Delete a project (SuperAdmin only)"
+					},
+					"response": []
+				}
+			],
+			"description": "Project management endpoints for CRUD operations on projects"
+		},
+		{
+			"name": "Task Management",
+			"item": [
+				{
+					"name": "Create Task",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"New Task\",\n  \"description\": \"Task description\",\n  \"projectId\": \"{{projectId}}\",\n  \"assignedUserId\": \"{{userId}}\",\n  \"priority\": \"Medium\",\n  \"status\": \"Todo\",\n  \"dueDate\": \"2024-12-31T00:00:00Z\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Task",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Task"
+							]
+						},
+						"description": "Create a new task (SuperAdmin, ProjectManager, TeamLead)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Tasks",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Task",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Task"
+							]
+						},
+						"description": "Retrieve all tasks (SuperAdmin, ProjectManager, TeamLead)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Task by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Task/{{taskId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Task",
+								"{{taskId}}"
+							]
+						},
+						"description": "Retrieve a specific task by ID (SuperAdmin, ProjectManager, TeamLead, Member)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tasks by Project",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Task/project/{{projectId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Task",
+								"project",
+								"{{projectId}}"
+							]
+						},
+						"description": "Retrieve all tasks for a specific project (SuperAdmin, ProjectManager, TeamLead, Member)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tasks by User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Task/user/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Task",
+								"user",
+								"{{userId}}"
+							]
+						},
+						"description": "Retrieve all tasks assigned to a specific user (SuperAdmin, ProjectManager, TeamLead, Member)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Task",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Updated Task Title\",\n  \"description\": \"Updated task description\",\n  \"projectId\": \"{{projectId}}\",\n  \"assignedUserId\": \"{{userId}}\",\n  \"priority\": \"High\",\n  \"status\": \"InProgress\",\n  \"dueDate\": \"2024-12-31T00:00:00Z\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Task/{{taskId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Task",
+								"{{taskId}}"
+							]
+						},
+						"description": "Update an existing task (SuperAdmin, ProjectManager, TeamLead)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Task",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Task/{{taskId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Task",
+								"{{taskId}}"
+							]
+						},
+						"description": "Delete a task (SuperAdmin, ProjectManager)"
+					},
+					"response": []
+				},
+				{
+					"name": "Change Task Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\"Done\""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Task/{{taskId}}/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Task",
+								"{{taskId}}",
+								"status"
+							]
+						},
+						"description": "Update the status of a task (SuperAdmin, ProjectManager, TeamLead, Member)"
+					},
+					"response": []
+				}
+			],
+			"description": "Task management endpoints for CRUD operations on tasks"
+		},
+		{
+			"name": "Project Member Management",
+			"item": [
+				{
+					"name": "Assign Member to Project",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"{{userId}}\",\n  \"projectId\": \"{{projectId}}\",\n  \"role\": \"Member\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/ProjectMember/assign",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ProjectMember",
+								"assign"
+							]
+						},
+						"description": "Assign a user to a project (SuperAdmin, ProjectManager)"
+					},
+					"response": []
+				},
+				{
+					"name": "List Project Members",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/ProjectMember/list/{{projectId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ProjectMember",
+								"list",
+								"{{projectId}}"
+							]
+						},
+						"description": "Get all members of a specific project (SuperAdmin, ProjectManager, TeamLead)"
+					},
+					"response": []
+				},
+				{
+					"name": "Search Project Members",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"projectId\": \"{{projectId}}\",\n  \"searchTerm\": \"john\",\n  \"role\": \"Member\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/ProjectMember/search",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ProjectMember",
+								"search"
+							]
+						},
+						"description": "Search for project members with filters (SuperAdmin, ProjectManager, TeamLead)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Project Member",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"{{userId}}\",\n  \"projectId\": \"{{projectId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/ProjectMember/delete",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ProjectMember",
+								"delete"
+							]
+						},
+						"description": "Remove a user from a project (SuperAdmin, ProjectManager)"
+					},
+					"response": []
+				}
+			],
+			"description": "Project member management endpoints for assigning and managing project members"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://localhost:7001",
+			"type": "string"
+		},
+		{
+			"key": "jwtToken",
+			"value": "YOUR_JWT_TOKEN_HERE",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "00000000-0000-0000-0000-000000000000",
+			"type": "string"
+		},
+		{
+			"key": "projectId",
+			"value": "00000000-0000-0000-0000-000000000000",
+			"type": "string"
+		},
+		{
+			"key": "taskId",
+			"value": "00000000-0000-0000-0000-000000000000",
+			"type": "string"
+		}
+	]
+} 

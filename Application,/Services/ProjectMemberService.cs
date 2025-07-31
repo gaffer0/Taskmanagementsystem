@@ -1,21 +1,15 @@
 ﻿using Application_.DTOs;
 using Application_.Interfaces;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Infrastructure.Interfaces;
 using Domain.Entities;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Infrastructure.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Application_.Services
 {
     public class ProjectMemberService : IProjectMemberService
     {
         private readonly IProjectMemberRepository _repository;
-        
+
         public ProjectMemberService(IProjectMemberRepository repository)
         {
             _repository = repository;
@@ -62,6 +56,33 @@ namespace Application_.Services
             catch (Exception ex)
             {
                 return new BadRequestObjectResult($"Error searching project members: {ex.Message}");
+            }
+        }
+
+        public async Task<IActionResult> AssignMemberToProjectAsync(AssignProjectMemberDTO assignDTO)
+        {
+            try
+            {
+                var newMember = new ProjectMember
+                {
+                    UserId = assignDTO.MemberId,
+                    ProjectId = assignDTO.ProjectId,
+                    Role = assignDTO.Role,
+                    Team = assignDTO.Team // optional, if you want to include
+                };
+                var result = await _repository.AssignMemberToProjectAsync(newMember);
+                if (result.Success)
+                {
+                    return new OkObjectResult(result.Message);
+                }
+                else
+                {
+                    return new BadRequestObjectResult(result.Message);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult($"Error assigning member: {ex.Message}");
             }
         }
     }

@@ -2,7 +2,6 @@ using System.Text;
 using Application_.Interfaces;
 using Application_.Services;
 using Domain.Entities;
-using Domain.Enums;
 using Infrastructure.Data;
 using Infrastructure.Interfaces;
 using Infrastructure.Repositories;
@@ -26,8 +25,10 @@ namespace Taskmanagementsystem
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
-            builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>().AddEntityFrameworkStores<AppDbContext>();
-            
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>()
+     .AddEntityFrameworkStores<AppDbContext>()
+     .AddDefaultTokenProviders();
+
             // Configure Authentication
             builder.Services.AddAuthentication(options =>
             {
@@ -88,7 +89,7 @@ namespace Taskmanagementsystem
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Task Management API", Version = "v1" });
-                
+
                 // Add JWT Bearer authentication to Swagger
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
@@ -136,7 +137,7 @@ namespace Taskmanagementsystem
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
                 var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                
+
                 await DbSeeder.SeedAllAsync(roleManager, userManager, context);
             }
 

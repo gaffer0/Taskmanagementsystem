@@ -1,12 +1,7 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Application_.DTOs;
+﻿using Application_.DTOs;
 using Application_.Interfaces;
-using Domain.Entities;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Taskmanagementsystem.Controllers
 {
@@ -48,6 +43,18 @@ namespace Taskmanagementsystem.Controllers
             }
 
             return await _projectMemberService.SearchProjectMembersAsync(searchRequest);
+        }
+
+        [HttpPost("assign")]
+        [Authorize(Roles = "SuperAdmin,ProjectManager")]
+        public async Task<IActionResult> AssignMember([FromBody] AssignProjectMemberDTO assignDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            return await _projectMemberService.AssignMemberToProjectAsync(assignDTO);
         }
     }
 }
