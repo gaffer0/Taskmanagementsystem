@@ -4,6 +4,7 @@ using Application_.Services;
 using Domain.Entities;
 using Domain.Enums;
 using Infrastructure.Data;
+using Infrastructure.Interfaces;
 using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -73,11 +74,13 @@ namespace Taskmanagementsystem
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             builder.Services.AddScoped<ITaskRepository, TaskRepository>();
             builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+            builder.Services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
 
             // Register Application Services
             builder.Services.AddScoped<IUserManagementService, UserManagementService>();
             builder.Services.AddScoped<ITaskService, TaskService>();
             builder.Services.AddScoped<IProjectService, ProjectService>();
+            builder.Services.AddScoped<IProjectMemberService, ProjectMemberService>();
 
             // Add services to the container.
             builder.Services.AddControllers();
@@ -132,9 +135,9 @@ namespace Taskmanagementsystem
             {
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 
-                await DbSeeder.SeedRolesAsync(roleManager);
-                await DbSeeder.SeedSuperAdminAsync(userManager);
+                await DbSeeder.SeedAllAsync(roleManager, userManager, context);
             }
 
             app.MapControllers();
