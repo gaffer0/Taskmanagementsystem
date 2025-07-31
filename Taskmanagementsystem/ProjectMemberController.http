@@ -1,0 +1,25 @@
+### Project Member Controller Tests
+
+### Delete Project Member
+DELETE {{baseUrl}}/api/ProjectMember/delete
+Content-Type: application/json
+
+{
+  "projectId": "00000000-0000-0000-0000-000000000001",
+  "memberId": "00000000-0000-0000-0000-000000000002"
+}
+
+### List Project Members
+GET {{baseUrl}}/api/ProjectMember/list/00000000-0000-0000-0000-000000000001
+
+### Search Project Members (all filters)
+GET {{baseUrl}}/api/ProjectMember/search/00000000-0000-0000-0000-000000000001?searchTerm=john&role=Member&team=Development
+
+### Search Project Members (search term only)
+GET {{baseUrl}}/api/ProjectMember/search/00000000-0000-0000-0000-000000000001?searchTerm=john
+
+### Search Project Members (role filter only)
+GET {{baseUrl}}/api/ProjectMember/search/00000000-0000-0000-0000-000000000001?role=Member
+
+### Search Project Members (team filter only)
+GET {{baseUrl}}/api/ProjectMember/search/00000000-0000-0000-0000-000000000001?team=Development 
