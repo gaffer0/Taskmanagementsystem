@@ -2,11 +2,10 @@
 
 namespace Application_.DTOs
 {
-    public class ResgiterUserDTO
+    public class ResetPasswordDTO
     {
         [Required]
-        [StringLength(50, MinimumLength = 3)]
-        public string UserName { get; set; } = string.Empty;
+        public string Token { get; set; } = string.Empty;
 
         [Required]
         [EmailAddress]
@@ -14,10 +13,10 @@ namespace Application_.DTOs
 
         [Required]
         [StringLength(100, MinimumLength = 6)]
-        public string Password { get; set; } = string.Empty;
+        public string NewPassword { get; set; } = string.Empty;
 
         [Required]
-        [Compare("Password", ErrorMessage = "Passwords do not match")]
+        [Compare("NewPassword", ErrorMessage = "Passwords do not match")]
         public string ConfirmPassword { get; set; } = string.Empty;
     }
 }

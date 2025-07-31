@@ -4,6 +4,7 @@ using System.Text;
 using Application_.DTOs;
 using Domain.Entities;
 using Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -15,11 +16,17 @@ namespace Taskmanagementsystem.Controllers
     public class AccountController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        public AccountController(UserManager<ApplicationUser> UserManager)
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IConfiguration _configuration;
+        public AccountController(
+             UserManager<ApplicationUser> userManager,
+             SignInManager<ApplicationUser> signInManager,
+             IConfiguration configuration)
         {
-            _userManager = UserManager;
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _configuration = configuration;
         }
-
 
         [HttpPost("Register")]//api/account/register
         public async Task<IActionResult> Register(ResgiterUserDTO RUser)
@@ -91,18 +98,25 @@ namespace Taskmanagementsystem.Controllers
                     {
                         UserClaim.Add(new Claim(ClaimTypes.Role, RoleName));
                     }
-                    var SignInKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("ThisIsAReallyStrongSecretKey1234567890!"));
+                    var jwtKey = _configuration["Jwt:Key"];
+                    var jwtIssuer = _configuration["Jwt:Issuer"];
+                    var jwtAudience = _configuration["Jwt:Audience"];
+
+                    if (string.IsNullOrEmpty(jwtKey))
+                    {
+                        return StatusCode(500, "JWT configuration is missing");
+                    }
+
+                    var SignInKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
                     SigningCredentials credentials = new SigningCredentials(SignInKey, SecurityAlgorithms.HmacSha256);
 
-
                     JwtSecurityToken MyToken = new JwtSecurityToken(
-                        issuer: "https://localhost:7284/",
-                        audience: "",
+                        issuer: jwtIssuer,
+                        audience: jwtAudience,
                         expires: DateTime.Now.AddHours(1),
                         claims: UserClaim,
                         signingCredentials: credentials
-
-                        );
+                    );
 
 
 
@@ -127,6 +141,68 @@ namespace Taskmanagementsystem.Controllers
                 ModelState.AddModelError("UserName", "User name or password is invalid");
 
             }
+            return BadRequest(ModelState);
+        }
+
+
+
+        [HttpPost("Logout")]
+        [Authorize]
+        public IActionResult Logout()
+        {
+            // For JWT, logout is typically handled on client by discarding token
+            // Alternatively, implement token blacklist if needed
+            return Ok("Logout successful");
+        }
+
+        [HttpPost("ForgotPassword")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDTO forgotDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var user = await _userManager.FindByEmailAsync(forgotDto.Email);
+            if (user == null || !user.IsActive)
+            {
+                // To prevent account enumeration, respond with success message
+                return Ok("If an account with that email exists, a password reset link has been sent.");
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var resetLink = Url.Action("ResetPassword", "Account", new { token, email = user.Email }, Request.Scheme);
+
+            // TODO: Send email with resetLink (via SMTP or email service)
+            // For demonstration, returning link in response
+            return Ok(new { message = "Password reset link has been sent.", resetLink });
+        }
+
+        [HttpPost("ResetPassword")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO resetDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (resetDto.NewPassword != resetDto.ConfirmPassword)
+            {
+                ModelState.AddModelError("Password", "Passwords do not match");
+                return BadRequest(ModelState);
+            }
+
+            var user = await _userManager.FindByEmailAsync(resetDto.Email);
+            if (user == null || !user.IsActive)
+            {
+                return BadRequest("Invalid request");
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, resetDto.Token, resetDto.NewPassword);
+            if (result.Succeeded)
+            {
+                return Ok("Password has been reset successfully");
+            }
+
+            foreach (var error in result.Errors)
+                ModelState.AddModelError(error.Code, error.Description);
+
             return BadRequest(ModelState);
         }
     }
